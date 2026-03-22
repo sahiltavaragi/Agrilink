@@ -30,6 +30,12 @@ export default function CheckoutPage() {
   const total = totalPrice + DELIVERY + GST
 
   async function handlePlaceOrder() {
+    console.log('--- handlePlaceOrder Clicked ---', { paymentMethod, userId: user?.id })
+    
+    if (!user) {
+      toast.error('You must be logged in to place an order')
+      return
+    }
     if (!address.name || !address.phone || !address.line1 || !address.city || !address.pincode) {
       toast.error('Please fill in all address fields')
       return
@@ -38,18 +44,24 @@ export default function CheckoutPage() {
       toast.error('Your cart is empty')
       return
     }
+    if (isNaN(total) || total <= 0) {
+      toast.error('Invalid order total')
+      return
+    }
 
     setLoading(true)
     try {
       if (paymentMethod === 'razorpay') {
         const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
+        console.log('--- Placing Razorpay Order ---', { total, userId: user.id })
+        
         // 1. Create order on backend
         const { data: order } = await axios.post(`${backendUrl}/api/payment/create-order`, {
           amount: total,
           userId: user.id,
           items,
           address,
-        })
+        }, { timeout: 10000 }) // 10s timeout
 
         // 2. Open Razorpay Checkout
         const options = {
@@ -85,12 +97,16 @@ export default function CheckoutPage() {
           prefill: {
             name: address.name,
             contact: address.phone,
-            email: user.email,
+            email: user?.email || '',
           },
           theme: { color: '#10b981' }, // emerald-500
         }
 
-        const rzp = new Razorpay(options)
+        const RZP = Razorpay || window.Razorpay
+        if (!RZP) {
+          throw new Error('Razorpay SDK not loaded. Please wait a moment or refresh.')
+        }
+        const rzp = new RZP(options)
         rzp.open()
         setLoading(false)
         return // Exit here, verification handler takes over
@@ -101,8 +117,8 @@ export default function CheckoutPage() {
         if (walletErr || !success) throw new Error('Insufficient wallet balance or wallet error')
       }
 
-      // Insert order directly into Supabase
-      const { data: order, error: orderError } = await supabase
+      // Insert order directly into Supabase (for COD/Wallet)
+      const { data: ord, error: orderError } = await supabase
         .from('orders')
         .insert({
           user_id: user.id,
@@ -119,7 +135,7 @@ export default function CheckoutPage() {
 
       // Insert order items
       const orderItems = items.map(item => ({
-        order_id: order.id,
+        order_id: ord.id,
         product_id: item.id,
         quantity: item.quantity,
         price_at_time: item.price,
@@ -131,7 +147,7 @@ export default function CheckoutPage() {
 
       if (itemsError) throw itemsError
 
-      // Decrement stock for each product (simple read then update)
+      // Decrement stock for each product
       for (const item of items) {
         try {
           const { data: prod } = await supabase
@@ -146,7 +162,6 @@ export default function CheckoutPage() {
               .eq('id', item.id)
           }
         } catch {
-          // Non-critical — order already saved, just log
           console.warn('Stock update failed for', item.id)
         }
       }
@@ -155,7 +170,7 @@ export default function CheckoutPage() {
       toast.success('Order placed successfully! 🌱')
       navigate('/orders')
     } catch (err) {
-      console.error(err)
+      console.error('Checkout error:', err)
       toast.error(err.message || 'Something went wrong. Please try again.')
     } finally {
       setLoading(false)
@@ -261,9 +276,9 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <button onClick={handlePlaceOrder} disabled={loading || items.length === 0 || (paymentMethod === 'razorpay' && isRazorpayLoading)}
+              <button onClick={handlePlaceOrder} disabled={loading || items.length === 0}
                 className="btn-primary w-full py-4 mt-6 text-base disabled:opacity-60 disabled:cursor-not-allowed">
-                {loading || (paymentMethod === 'razorpay' && isRazorpayLoading)
+                {loading
                   ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" />
                   : <><span>Place Order</span><ArrowRight size={17} /></>
                 }
