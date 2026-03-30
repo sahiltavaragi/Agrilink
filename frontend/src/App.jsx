@@ -1,4 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
+// v2 deployment - restarting for configuration update
+import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/AuthContext'
 import { CartProvider } from './contexts/CartContext'
 import { ProtectedRoute, GuestRoute } from './components/ProtectedRoute'

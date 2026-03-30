@@ -387,8 +387,8 @@ export default function AdminPanel() {
                     <thead>
                       <tr className="bg-white/5 text-[10px] uppercase tracking-[0.2em] font-black text-gray-500">
                         <th className="px-8 py-5">User</th>
-                        <th className="px-8 py-5">Role</th>
-                        <th className="px-8 py-5">Wallet</th>
+                        <th className="px-8 py-5 hidden md:table-cell">Role</th>
+                        <th className="px-8 py-5 hidden sm:table-cell">Wallet</th>
                         <th className="px-8 py-5 text-right">Actions</th>
                       </tr>
                     </thead>
@@ -406,7 +406,7 @@ export default function AdminPanel() {
                               </div>
                             </div>
                           </td>
-                          <td className="px-8 py-5">
+                          <td className="px-8 py-5 hidden md:table-cell">
                             <span className={cn(
                               "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
                               u.role === 'admin' ? "bg-earth-500/20 text-earth-400" :
@@ -416,7 +416,7 @@ export default function AdminPanel() {
                               {u.role || 'buyer'}
                             </span>
                           </td>
-                          <td className="px-8 py-5">
+                          <td className="px-8 py-5 hidden sm:table-cell">
                             <p className="text-sm font-bold text-white">₹{u.wallet_balance?.toLocaleString() || 0}</p>
                           </td>
                           <td className="px-8 py-5 text-right">
@@ -478,7 +478,7 @@ export default function AdminPanel() {
                       <thead>
                         <tr className="border-b border-white/10">
                           <th className="text-left py-3 px-5 text-gray-500 font-medium">User</th>
-                          <th className="text-left py-3 px-4 text-gray-500 font-medium">Role</th>
+                          <th className="text-left py-3 px-4 text-gray-500 font-medium hidden md:table-cell">Role</th>
                           <th className="text-left py-3 px-4 text-gray-500 font-medium">Wallet Balance</th>
                           <th className="text-left py-3 px-4 text-gray-500 font-medium">Add Money</th>
                         </tr>
@@ -494,7 +494,7 @@ export default function AdminPanel() {
                                 <span className="text-white">{u.full_name || '—'}</span>
                               </div>
                             </td>
-                            <td className="py-3 px-4">
+                            <td className="py-3 px-4 hidden md:table-cell">
                               <span className={`badge ${u.role === 'admin' ? 'badge-earth' : u.role === 'seller' ? 'badge-green' : 'bg-dark-600 text-gray-400'}`}>
                                 {u.role || 'buyer'}
                               </span>

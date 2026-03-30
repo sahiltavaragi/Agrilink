@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '../lib/utils'
 
 export default function Navbar() {
-  const { user, profile, signOut } = useAuth()
+  const { user, profile, signOut, loading: authLoading } = useAuth()
   const { totalItems } = useCart()
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -200,12 +200,19 @@ export default function Navbar() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center gap-4">
+          <div className="md:hidden flex items-center gap-1">
+            <button 
+              onClick={() => { navigate('/products'); setMobileOpen(false); }}
+              className="p-2 text-gray-400 hover:text-white transition-colors"
+            >
+              <Search size={22} />
+            </button>
+
             {user && (
               <Link to="/cart" className="relative p-2 text-gray-400">
                 <ShoppingCart size={22} />
                 {totalItems > 0 && (
-                  <span className="absolute top-0 right-0 w-4 h-4 bg-primary-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                  <span className="absolute top-1 right-1 w-4 h-4 bg-primary-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-dark-900">
                     {totalItems}
                   </span>
                 )}
@@ -213,7 +220,7 @@ export default function Navbar() {
             )}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="p-2 text-gray-400 hover:text-white transition-colors"
+              className="p-2 text-gray-400 hover:text-white transition-colors ml-1"
             >
               {mobileOpen ? <X size={26} /> : <Menu size={26} />}
             </button>
@@ -230,24 +237,103 @@ export default function Navbar() {
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden bg-dark-900 border-b border-white/10 overflow-hidden"
           >
-            <div className="px-4 pt-2 pb-6 space-y-1">
-              {navLinks.map(({ to, label }) => (
-                <Link
-                  key={to}
-                  to={to}
-                  onClick={() => setMobileOpen(false)}
-                  className="block px-4 py-3 rounded-xl text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white"
-                >
-                  {label}
-                </Link>
-              ))}
+            <div className="px-4 py-6 space-y-1">
+              {/* Mobile Search */}
+              <div className="pb-6">
+                <form onSubmit={handleSearch} className="relative">
+                  <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
+                  <input
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    placeholder="Search AgriLink..."
+                    className="w-full bg-dark-800 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-primary-500/50"
+                  />
+                </form>
+              </div>
+
+              <div className="space-y-1">
+                {navLinks.map(({ to, label }) => (
+                  <Link
+                    key={to}
+                    to={to}
+                    onClick={() => setMobileOpen(false)}
+                    className="block px-4 py-3 rounded-xl text-lg font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </div>
               
-              {!user && (
-                <div className="grid grid-cols-2 gap-3 pt-4 px-2">
-                  <Link to="/login" onClick={() => setMobileOpen(false)} className="btn-secondary py-3 text-center">Login</Link>
-                  <Link to="/register" onClick={() => setMobileOpen(false)} className="btn-primary py-3 text-center">Join</Link>
-                </div>
-              )}
+              <div className="pt-6 mt-6 border-t border-white/5">
+                {authLoading ? (
+                  <div className="px-4 py-2 flex items-center gap-3">
+                    <div className="w-4 h-4 border-2 border-primary-500/30 border-t-primary-500 rounded-full animate-spin" />
+                    <span className="text-xs text-gray-500">Syncing...</span>
+                  </div>
+                ) : user ? (
+                  <div className="space-y-4">
+                    <div className="px-4 flex items-center gap-4 mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-br from-primary-600 to-primary-800 rounded-2xl flex items-center justify-center shadow-lg">
+                        <span className="text-lg font-bold text-white uppercase">
+                          {profile?.full_name?.[0] || user.email?.[0]}
+                        </span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-white font-bold truncate">{profile?.full_name || 'Farmer'}</p>
+                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-1">
+                      <NavbarMobileLink to="/profile" icon={User} label="My Profile" onClick={() => setMobileOpen(false)} />
+                      <NavbarMobileLink to="/orders" icon={Package} label="My Orders" onClick={() => setMobileOpen(false)} />
+                      
+                      {profile?.role === 'seller' && profile?.is_approved_seller && (
+                        <NavbarMobileLink to="/seller/dashboard" icon={Store} label="Seller Dashboard" onClick={() => setMobileOpen(false)} highlight />
+                      )}
+                      
+                      {profile?.role === 'admin' && (
+                        <NavbarMobileLink to="/admin" icon={ShieldCheck} label="Admin Control" onClick={() => setMobileOpen(false)} highlight />
+                      )}
+                    </div>
+
+                    <div className="pt-4">
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 font-bold text-sm"
+                      >
+                        <LogOut size={18} /> Sign Out
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3 px-2">
+                    <Link 
+                      to="/login" 
+                      onClick={() => setMobileOpen(false)} 
+                      className="flex items-center justify-center w-full py-3.5 rounded-xl bg-dark-800 text-white font-bold text-sm border border-white/5 hover:bg-dark-700 transition-colors"
+                    >
+                      Login
+                    </Link>
+                    <Link 
+                      to="/register" 
+                      onClick={() => setMobileOpen(false)} 
+                      className="flex items-center justify-center w-full py-3.5 rounded-xl bg-primary-500 text-white font-bold text-sm shadow-glow-green"
+                    >
+                      Join AgriLink
+                    </Link>
+                    <div className="pt-4 flex items-center justify-center">
+                      <Link 
+                        to="/login?role=admin" 
+                        onClick={() => setMobileOpen(false)} 
+                        className="text-gray-500 text-xs hover:text-primary-400 flex items-center gap-1.5 transition-colors"
+                      >
+                        <ShieldCheck size={12} /> Admin Login
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </motion.div>
         )}
@@ -270,6 +356,24 @@ function NavbarItem({ to, icon: Icon, label, onClick, highlight }) {
     >
       <Icon size={16} />
       <span className="font-medium">{label}</span>
+    </Link>
+  )
+}
+
+function NavbarMobileLink({ to, icon: Icon, label, onClick, highlight }) {
+  return (
+    <Link
+      to={to}
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200",
+        highlight 
+          ? "text-primary-400 bg-primary-500/5 font-bold" 
+          : "text-gray-400 hover:bg-white/5 hover:text-white font-medium"
+      )}
+    >
+      <Icon size={18} />
+      <span className="text-sm">{label}</span>
     </Link>
   )
 }

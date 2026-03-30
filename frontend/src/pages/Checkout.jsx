@@ -50,18 +50,23 @@ export default function CheckoutPage() {
     }
 
     setLoading(true)
+    const activeToastId = toast.loading('Preparing your secure payment...')
+    
     try {
       if (paymentMethod === 'razorpay') {
         const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
-        console.log('--- Placing Razorpay Order ---', { total, userId: user.id })
+        console.log('--- Placing Razorpay Order ---', { total, userId: user.id, url: `${backendUrl}/api/payment/create-order` })
         
-        // 1. Create order on backend
+        // 1. Create order on backend (increased timeout to 60s for Vercel/Render cold starts)
         const { data: order } = await axios.post(`${backendUrl}/api/payment/create-order`, {
           amount: total,
           userId: user.id,
           items,
           address,
-        }, { timeout: 10000 }) // 10s timeout
+        }, { timeout: 60000 }) 
+
+        console.log('--- Order Created Successfully ---', order.id)
+        toast.dismiss(activeToastId)
 
         // 2. Open Razorpay Checkout
         const options = {
@@ -170,8 +175,12 @@ export default function CheckoutPage() {
       toast.success('Order placed successfully! 🌱')
       navigate('/orders')
     } catch (err) {
+      toast.dismiss(activeToastId)
       console.error('Checkout error:', err)
-      toast.error(err.message || 'Something went wrong. Please try again.')
+      const msg = err.code === 'ECONNABORTED' 
+        ? 'The request timed out. Please check your connection or try again.'
+        : (err.response?.data?.message || err.message || 'Something went wrong.')
+      toast.error(msg)
     } finally {
       setLoading(false)
     }

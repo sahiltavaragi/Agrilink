@@ -74,7 +74,7 @@ export default function ProductCard({ product }) {
           <button 
             onClick={handleAddToCart}
             disabled={product.quantity === 0}
-            className="absolute bottom-4 right-4 w-12 h-12 bg-primary-500 text-white rounded-full flex items-center justify-center shadow-xl shadow-primary-500/40 translate-y-20 group-hover:translate-y-0 transition-all duration-500 hover:bg-primary-400 hover:scale-110 active:scale-95 disabled:hidden"
+            className="absolute bottom-4 right-4 w-12 h-12 bg-primary-500 text-white rounded-full flex items-center justify-center shadow-xl shadow-primary-500/40 md:translate-y-20 md:group-hover:translate-y-0 translate-y-0 transition-all duration-500 hover:bg-primary-400 hover:scale-110 active:scale-95 disabled:hidden"
           >
             <ShoppingCart size={20} />
           </button>
