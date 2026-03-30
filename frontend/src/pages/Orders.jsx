@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom'
 const STATUS_CONFIG = {
   pending:    { icon: Clock,        color: 'text-yellow-400', bg: 'bg-yellow-900/30', label: 'Pending' },
   confirmed:  { icon: CheckCircle,  color: 'text-blue-400',   bg: 'bg-blue-900/30',   label: 'Confirmed' },
+  processing: { icon: Clock,        color: 'text-orange-400', bg: 'bg-orange-900/30', label: 'Processing' }, // New status
   shipped:    { icon: Truck,        color: 'text-purple-400', bg: 'bg-purple-900/30', label: 'Shipped' },
   delivered:  { icon: CheckCircle,  color: 'text-primary-400',bg: 'bg-primary-900/30',label: 'Delivered' },
   cancelled:  { icon: XCircle,      color: 'text-red-400',    bg: 'bg-red-900/30',    label: 'Cancelled' },
@@ -59,7 +60,8 @@ export default function OrdersPage() {
         ) : orders?.length > 0 ? (
           <div className="space-y-4">
             {orders.map(order => {
-              const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending
+              const statusKey = (order.status || 'pending').toLowerCase()
+              const cfg = STATUS_CONFIG[statusKey] || STATUS_CONFIG.pending
               const StatusIcon = cfg.icon
               return (
                 <div key={order.id} className="card p-6">
