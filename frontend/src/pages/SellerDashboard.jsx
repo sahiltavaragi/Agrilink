@@ -61,7 +61,7 @@ export default function SellerDashboard() {
       if (error) throw error
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['seller-orders'] })
+      qc.invalidateQueries({ queryKey: ['seller-orders', user?.id] })
       toast.success('Order status updated!')
     },
     onError: (err) => {
@@ -369,7 +369,7 @@ export default function SellerDashboard() {
                     ) : (
                       <div className="relative group/select">
                         <select 
-                          value={o.orders?.status}
+                          value={(o.orders?.status || 'pending').toLowerCase()}
                           onChange={(e) => updateOrderStatusMutation.mutate({ orderId: o.order_id, status: e.target.value })}
                           className="w-full appearance-none bg-dark-700 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white font-bold focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all cursor-pointer"
                         >
