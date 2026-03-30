@@ -6,6 +6,7 @@ import ProductCard from '../components/ProductCard'
 import Layout from '../components/Layout'
 import { motion } from 'framer-motion'
 import { cn } from '../lib/utils'
+import hero3d from '../assets/hero_3d.png'
 
 const CATEGORIES = [
   { name: 'Poultry Farming', emoji: '🐔', color: 'from-yellow-500/10 to-yellow-500/5', border: 'border-yellow-500/20', iconColor: 'text-yellow-500' },
@@ -109,7 +110,7 @@ export default function HomePage() {
             </div>
 
             {/* Quick Stats Overlay */}
-            <div className="grid grid-cols-3 gap-8 mt-16 pt-8 border-t border-white/5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mt-16 pt-8 border-t border-white/5">
               {STATS.slice(0, 3).map(({ label, value }) => (
                 <div key={label}>
                   <div className="text-2xl font-bold text-white mb-1">{value}</div>
@@ -121,35 +122,61 @@ export default function HomePage() {
 
           {/* Hero Image / Visual Element */}
           <motion.div 
-            initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
             className="relative hidden lg:block"
           >
-            <div className="relative z-10 rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl group">
+            {/* Ambient Glows */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-primary-500/10 rounded-full blur-[120px] animate-pulse-slow" />
+            <div className="absolute top-1/3 right-0 w-[60%] h-[60%] bg-earth-500/10 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '1.5s' }} />
+
+            <motion.div
+              animate={{ 
+                y: [0, -20, 0],
+              }}
+              transition={{ 
+                duration: 6, 
+                repeat: Infinity, 
+                ease: "easeInOut" 
+              }}
+              className="relative z-10"
+            >
               <img 
-                src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&q=80&w=800" 
-                alt="Organic Farming"
-                className="w-full h-[600px] object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
+                src={hero3d} 
+                alt="AgriLink Farmer and Animals"
+                className="w-full h-auto drop-shadow-[0_20px_50px_rgba(16,185,129,0.3)]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-transparent to-transparent" />
               
-              <div className="absolute bottom-8 left-8 right-8 p-6 bg-dark-800/80 backdrop-blur-xl border border-white/10 rounded-2xl">
+              {/* Floating Badge */}
+              <motion.div 
+                animate={{ y: [0, 10, 0] }}
+                transition={{ duration: 4, repeat: Infinity }}
+                className="absolute -bottom-6 -left-6 p-6 bg-dark-800/80 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl"
+              >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center shadow-glow-green">
-                    <Star size={20} className="text-white fill-white" />
+                  <div className="w-12 h-12 bg-primary-500 rounded-2xl flex items-center justify-center shadow-glow-green">
+                    <Star size={24} className="text-white fill-white" />
                   </div>
                   <div>
-                    <div className="text-white font-bold">4.8/5 Avg. Rating</div>
-                    <div className="text-gray-400 text-sm">from 2,500+ farmer reviews</div>
+                    <div className="text-white font-bold text-lg">Trusted by 12k+</div>
+                    <div className="text-gray-400 text-sm">Active Indian Farmers</div>
                   </div>
                 </div>
-              </div>
-            </div>
-            
-            {/* Decorative Elements */}
-            <div className="absolute -top-10 -left-10 w-40 h-40 bg-earth-500/20 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute -bottom-10 -right-10 w-60 h-60 bg-primary-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+              </motion.div>
+
+              {/* Floating Elements (Animals mention) */}
+              <motion.div 
+                animate={{ y: [0, -15, 0] }}
+                transition={{ duration: 5, repeat: Infinity, delay: 0.5 }}
+                className="absolute top-10 -right-4 p-4 bg-earth-500/10 backdrop-blur-md border border-earth-500/20 rounded-2xl"
+              >
+                <div className="flex items-center gap-2 text-earth-400 font-bold">
+                  <Package size={18} />
+                  <span>Quality Livestock Inputs</span>
+                </div>
+              </motion.div>
+            </motion.div>
           </motion.div>
         </div>
       </section>
@@ -191,20 +218,25 @@ export default function HomePage() {
                 <Link
                   to={`/products?category=${encodeURIComponent(name)}`}
                   className={cn(
-                    "group relative block h-full p-8 rounded-[2rem] border bg-gradient-to-br transition-all duration-500 overflow-hidden",
-                    color, border, "hover:-translate-y-2 hover:shadow-2xl"
+                    "group relative block h-full p-8 rounded-[2.5rem] border bg-gradient-to-br transition-all duration-500 overflow-hidden",
+                    color, border, "hover:-translate-y-3 hover:shadow-[0_0_50px_rgba(0,0,0,0.5)] hover:border-primary-500/40"
                   )}
                 >
                   <div className="relative z-10 text-center">
-                    <div className="text-5xl mb-6 group-hover:scale-125 transition-transform duration-500 block">
+                    <motion.div 
+                      whileHover={{ scale: 1.2, rotate: [0, -10, 10, 0] }}
+                      className="text-6xl mb-6 block drop-shadow-xl"
+                    >
                       {emoji}
-                    </div>
-                    <p className="text-white text-sm font-bold leading-tight group-hover:text-primary-400 transition-colors">
+                    </motion.div>
+                    <p className="text-white text-base font-bold leading-tight group-hover:text-primary-400 transition-colors uppercase tracking-wider">
                       {name}
                     </p>
                   </div>
+                  {/* Glass highlight */}
+                  <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
                   {/* Decorative background circle */}
-                  <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-white/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                  <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:bg-primary-500/20 transition-all duration-700" />
                 </Link>
               </motion.div>
             ))}
